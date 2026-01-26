@@ -1,23 +1,22 @@
-LEVEL = 1
 PORT = wildbits
-include ../rules.mak
+include ../../rules.mak
 
-ifeq ($(SYSTEM), "jr")
+ifeq ($(PLATFORM), jr)
   KEYSUB = keydrv_ps2
 else
   KEYSUB = keydrv_k2
-  SYSTEM = "k2"
+  PLATFORM = k2
 endif
 
-DSKIMAGE = l1_wildbits$(SYSTEM).dsk
+DSKIMAGE = l$(LEVEL)_wildbits$(PLATFORM).dsk
 
-vpath %.asm $(NITROS9DIR)/level1/$(PORT)/modules:$(NITROS9DIR)/level1/$(PORT)/cmds:$(NITROS9DIR)/level1/modules/kernel:$(NITROS9DIR)/level1/modules:$(NITROS9DIR)/level1/$(PORT)/cmds:$(NITROS9DIR)/level1/cmds:$(NITROS9DIR)/level1/$(PORT)/sys/fonts
-vpath %.as $(NITROS9DIR)/level1/$(PORT)/modules:$(NITROS9DIR)/level1/$(PORT)/cmds:$(NITROS9DIR)/level1/modules/kernel:$(NITROS9DIR)/level1/modules:$(NITROS9DIR)/level1/$(PORT)/cmds:$(NITROS9DIR)/level1/cmds:$(NITROS9DIR)/level1/$(PORT)/sys/fonts
+AFLAGS += -I.
+ifeq ($(LEVEL),2)
+AFLAGS += -I$(L2MD)/kernel -I$(L2PMD)
+endif
+AFLAGS += -I$(L1MD)/kernel -I$(L1PMD)
+LFLAGS += -L . -lwildbitsl$(LEVEL) -lnet -lalib
 
-AFLAGS += -I. -I$(NITROS9DIR)/level1/$(PORT)/modules
-LFLAGS += -L . -lwildbitsl1 -lnet -lalib
-
-KERNEL = krn krnp2 ioman init
 RBF = rbf rbsuper llwbsd rbmem dds0 s1 f0 f1
 SCF = scf vtio $(KEYSUB) term bannerfont palette
 DRIVEWIRE_RBF = rbdw x0 x1 x2 x3
@@ -30,22 +29,35 @@ CLOCK = clock clock2_wildbits
 # NOTE!!!
 # VTIO must be near the top of the bootlist so that it can safely map
 # the text and CLUT blocks into $E000-$FFFF.
-BOOTMODS = $(KERNEL) \
+ifeq ($(LEVEL),2)
+BOOTMODS = krnp2 ioman init \
+	$(SCF) \
+	$(RBF) \
+	$(CLOCK) \
+	sysgo \
+	krn
+else
+BOOTMODS = krn krnp2 ioman init \
 	$(SCF) \
 	$(RBF) \
 	$(CLOCK) \
 	sysgo shell_21
+endif
 
-CMDS = $(STDCMDS) \
+CMDS += $(STDCMDS) \
 	bootos9 wbinfo wbreset modem \
 	inetd telnet dw httpd $(BASIC09) $(BF)
 
 all: libs $(DSKIMAGE)
 
-include ../libs.mak
+include ../../libs.mak
 
+ifeq ($(LEVEL),2)
+	PADUP = ./padup256 bootfile
+endif
 bootfile: $(BOOTMODS)
 	$(MERGE) $(BOOTMODS)>$@
+	$(PADUP)
 
 $(DSKIMAGE): bootfile $(CMDS)
 	$(RM) $@
@@ -54,7 +66,6 @@ $(DSKIMAGE): bootfile $(CMDS)
 	$(MAKDIR) $@,CMDS
 	$(MAKDIR) $@,SYS
 	$(MAKDIR) $@,DEFS
-	$(OS9ATTR_EXEC) $@,sysgo
 	$(OS9COPY) $(CMDS) $@,CMDS
 	$(OS9ATTR_EXEC) $(foreach file,$(CMDS),$@,CMDS/$(file))
 #	$(CD) sys; $(CPL) $(SYSTEXT) ../$@,SYS

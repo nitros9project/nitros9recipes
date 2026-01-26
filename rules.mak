@@ -19,6 +19,26 @@ OS9		= os9
 DEFSDIR		= $(NITROS9DIR)/defs
 DSKDIR		= $(NITROS9DIR)/dsks
 
+L1D = $(NITROS9DIR)/level1
+L2D = $(NITROS9DIR)/level2
+L1MD = $(L1D)/modules
+L2MD = $(L2D)/modules
+L1CD = $(L1D)/cmds
+L2CD = $(L2D)/cmds
+L1PD = $(L1D)/$(PORT)
+L2PD = $(L2D)/$(PORT)
+L1PMD = $(L1PD)/modules
+L2PMD = $(L2PD)/modules
+L1PCD = $(L1PD)/cmds
+L2PCD = $(L2PD)/cmds
+
+ifeq ($(LEVEL),2)
+  vpath %.asm $(L2PMD):$(L2PCD):$(L1PMD):$(L1PCD):$(L2MD):$(L1MD):$(L2CD):$(L1CD):$(L2MD)/kernel:$(L1MD)/kernel:$(L2PD)/sys/fonts:$(L1PD)/sys/fonts
+ vpath %.as $(L2PMD):$(L2PCD):$(L1PMD):$(L1PCD):$(L2MD):$(L1MD):$(L2CD):$(L1CD):$(L2MD)/kernel:$(L1MD)/kernel:$(L2PD)/sys/fonts:$(L1PD)/sys/fonts
+else
+  vpath %.asm $(L1PMD):$(L1PCD):$(L1MD):$(L1CD):$(L1MD)/kernel:$(L1PD)/sys/fonts
+  vpath %.as $(L1PMD):$(L1PCD):$(L1MD):$(L1CD):$(L1MD)/kernel:$(L1PD)/sys/fonts
+endif
 
 # If we're using the OS-9 emulator and the *real* OS-9 assembler,
 # uncomment the following two lines.
