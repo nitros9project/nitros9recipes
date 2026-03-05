@@ -1,4 +1,7 @@
+LEVEL = 1
 PORT = wildbits
+vpath %.asm $(NITROS9DIR)/level1/$(PORT)/feu
+vpath %.as $(NITROS9DIR)/level1/$(PORT)/feu
 include ../../rules.mak
 
 ifeq ($(PLATFORM), jr)
@@ -8,16 +11,14 @@ else
   PLATFORM = k2
 endif
 
-DSKIMAGE = l$(LEVEL)_wildbits$(PLATFORM).dsk
+DSKIMAGE = feu_wildbits$(PLATFORM).dsk
 
 AFLAGS += -I.
-ifeq ($(LEVEL),2)
-AFLAGS += -I$(L2MD)/kernel -I$(L2PMD)
-endif
 AFLAGS += -I$(L1MD)/kernel -I$(L1PMD)
 LFLAGS += -L $(LIBDIR) -lwildbitsl$(LEVEL) -lnet -lalib
 
-RBF = rbf rbsuper llwbsd rbmem dds0 s1 f0 f1
+KERNEL = krn krnp2 ioman init
+RBF = rbf rbsuper llwbsd rbmem dds0 s0 s1 f0 f1
 SCF = scf vtio $(KEYSUB) term bannerfont palette
 DRIVEWIRE_RBF = rbdw x0 x1 x2 x3
 DRIVEWIRE_SCF = scdwv n1 n2 n3 n4 n5
@@ -26,38 +27,110 @@ PIPE = pipeman piper pipe
 SC16550 = sc16550 t0_sc16550
 CLOCK = clock clock2_wildbits
 
+sysgo: $(OBJDIR)/sysgo.o
+	$(LINKER) $(LFLAGS) $^ -o$@
+
+$(OBJDIR)/sysgo.o: sysgo.as
+
 # NOTE!!!
 # VTIO must be near the top of the bootlist so that it can safely map
 # the text and CLUT blocks into $E000-$FFFF.
-ifeq ($(LEVEL),2)
-BOOTMODS = krnp2 ioman init \
+BOOTMODS = $(KERNEL) \
 	$(SCF) \
 	$(RBF) \
 	$(CLOCK) \
-	sysgo \
-	krn
-else
-BOOTMODS = krn krnp2 ioman init \
-	$(SCF) \
-	$(RBF) \
-	$(CLOCK) \
-	sysgo shell_21
-endif
+	sysgo shell_21 \
+	display echo wbreset \
+	iniz deiniz \
+	load link unlink \
+	bootos9
 
-CMDS += $(STDCMDS) \
-	bootos9 wbinfo wbreset modem \
-	inetd telnet dw httpd $(BASIC09) $(BF)
+F0_CMDS = attr \
+		build \
+		copy \
+		date \
+		debug del deldir \
+		devs dir dump \
+		edit \
+		wbinfo \
+		ident irqs \
+		list \
+		makdir mfree mdir \
+	    pick \
+		procs pwd pxd \
+		setime sleep \
+		tmode
 
-all: libs $(DSKIMAGE)
+all: libs bootfile booter
 
 include ../../libs.mak
 
-ifeq ($(LEVEL),2)
-	PADUP = ./padup256 bootfile
-endif
 bootfile: $(BOOTMODS)
 	$(MERGE) $(BOOTMODS)>$@
-	$(PADUP)
+
+booter: bootfile
+	$(PADROM) 23552 bootfile
+	$(AS) -DFLASH=1 --output=raw $(LEVEL1)/$(PORT)/feu/trampoline.asm -o$@.tmp
+	cat bootfile $@.tmp > $@
+	$(RM) $@.tmp
+
+upload: booter
+	upload $^ 8000
+
+flash: flash_booter flash_f0
+	
+flash_booter: all booter.zip
+	bulk_flash bulk_booter.csv
+
+flash_f0: all f0.zip
+	bulk_flash bulk_f0.csv
+
+f0.zip: f0.dsk
+	-rm f0_? bulk_f0.csv
+	dd status=none bs=8k skip=0 count=1 if=$^ of=f0_0
+	dd status=none bs=8k skip=1 count=1 if=$^ of=f0_1
+	dd status=none bs=8k skip=2 count=1 if=$^ of=f0_2
+	dd status=none bs=8k skip=3 count=1 if=$^ of=f0_3
+	dd status=none bs=8k skip=4 count=1 if=$^ of=f0_4
+	echo "38,f0_0" > bulk_f0.csv
+	echo "39,f0_1" >> bulk_f0.csv
+	echo "3a,f0_2" >> bulk_f0.csv
+	echo "3b,f0_3" >> bulk_f0.csv
+	echo "3c,f0_4" >> bulk_f0.csv
+	zip $@ bulk_f0.csv f0_0 f0_1 f0_2 f0_3 f0_4
+
+booter.zip: booter
+	-rm booter_? bulk_booter.csv
+	dd status=none bs=8k skip=0 count=1 if=$^ of=booter_0
+	dd status=none bs=8k skip=1 count=1 if=$^ of=booter_1
+	dd status=none bs=8k skip=2 count=1 if=$^ of=booter_2
+	echo "3d,booter_0" > bulk_booter.csv
+	echo "3e,booter_1" >> bulk_booter.csv
+	echo "3f,booter_2" >> bulk_booter.csv
+	-rm -rf mapfiles
+	mkdir mapfiles
+	os9 ident -s $^ > mapfiles/bootlist
+	zip $@ bulk_booter.csv booter_0 booter_1 booter_2 mapfiles/*
+	-rm -rf mapfiles
+
+FEU_FILES = $(foreach file,$(NITROS9DIR)/level1/$(PORT)/feu/feu/*,$(file))
+
+f0.dsk: startup $(F0_CMDS)
+	$(OS9FORMAT) -q -t10 -st16 $@ -n"FEU"
+	$(MAKDIR) $@,CMDS
+	$(OS9COPY) $(F0_CMDS) $@,CMDS
+	$(OS9ATTR_EXEC) $(foreach file,$(F0_CMDS),$@,CMDS/$(file))
+	$(MAKDIR) $@,FEU
+	$(OS9COPY) -l startup $@,FEU
+	$(foreach file,$(FEU_FILES),$(OS9COPY) -l $(file) $@,FEU)
+	
+startup:
+	echo "display 1b 61 1 ff 0 0 ff 5 22 f0 1b 20 2 0 0 50 18 0 1 0 1b 32 7" > $@
+	echo "echo FEU - First Execution Unit" >> $@
+	echo "echo Build date:" `date` >> $@
+	echo "wbinfo" >> $@
+	echo "chd .../feu" >> $@
+	echo "pick -pFEU: main.pick</1" >> $@
 
 $(DSKIMAGE): bootfile $(CMDS)
 	$(RM) $@
@@ -251,7 +324,7 @@ z14: scdwvdesc.asm
 	$(AS) $(AFLAGS) $< $(ASOUT)$@ $(AFLAGS) -DAddr=30
 
 clean:
-	$(RM) $(BOOTMODS) $(CMDS) *.list *.map bootfile *.dsk
+	$(RM) $(BOOTMODS) $(F0_CMDS) *.list *.map bootfile *.dsk booter* *.zip *.csv f0_? sysgo startup
 	-rm -rf $(OBJDIR) $(LIBDIR)
 
-.PHONY: all clean libs
+.PHONY: all clean upload flash flash_booter flash_f0 libs

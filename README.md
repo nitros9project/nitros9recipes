@@ -1,13 +1,53 @@
 # NitrOS-9 Build Recipes
 
-The goal of this repository is to decouple the build process and resulting build artifacts from the NitrOS-9 repository itself. Anyone is free to use whatever build tool (e.g. make, ninja) they choose to build for their particular port (CoCo, Dragon, Wildbits, etc.) 
+This repository contains standalone build recipes for NitrOS-9 ports, separated from the main NitrOS-9 source tree.
 
-## Structure
+## What This Repository Does
 
-At the top folder are two files:
+- Defines reusable build rules in `rules.mak`
+- Defines shared library build rules in `libs.mak`
+- Hosts platform-specific recipe folders (for example, `wildbits/`)
 
-- `rules.mak`: contains rules for various file types
-- `libs.mak`: a makefile for building libraries
+Platform-specific usage, targets, and workflows should be documented in each platform folder README.
 
-Port-specific makefiles include these files.
+## Prerequisites
 
+You need these tools available on your `PATH`:
+
+- `make`
+- `lwasm`, `lwlink`, `lwar` (LWTOOLS)
+- `os9` command suite (used for `format`, `copy`, `attr`, `padrom`, etc.)
+- `zip` (for FEU packaging targets)
+
+You must set:
+
+- `NITROS9DIR` to the root of your NitrOS-9 source tree
+
+Example:
+
+```sh
+export NITROS9DIR=/Users/boisy/Projects/coco-shelf/nitros9
+```
+
+## Build Artifact Layout
+
+Object and library intermediates are now isolated per build directory:
+
+- `$(OBJDIR)` defaults to `.obj`
+- `$(LIBDIR)` defaults to `.lib`
+
+So when you build from `wildbits/l1`, `wildbits/l2`, or `wildbits/feu`, that directory will contain:
+
+- `.obj/` for intermediate objects (`*.o`)
+- `.lib/` for generated libraries (`*.a`)
+- final outputs as defined by the local platform makefile in that directory
+
+## Repository Structure
+
+- `rules.mak`: shared compiler/linker/tool definitions and pattern rules
+- `libs.mak`: shared library targets consumed by port makefiles
+- `<platform>/`: platform-specific recipes and usage documentation
+
+## Platform Documentation
+
+- Wildbits: see `wildbits/README.md`

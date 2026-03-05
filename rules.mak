@@ -54,6 +54,8 @@ ASOUT		= -o
 ifdef LISTDIR
 ASOUT		= --list=$(LISTDIR)/$@.lst --symbols -o
 endif
+OBJDIR		?= .obj
+LIBDIR		?= .lib
 AFLAGS		= -DNOS9VER=$(NOS9VER) -DNOS9MAJ=$(NOS9MAJ) -DNOS9MIN=$(NOS9MIN)
 ifdef PORT
 AFLAGS		+= -D$(PORT)=1
@@ -135,19 +137,25 @@ MASTER = -DITDNS=0
 
 
 # C-Cubed Rules
-%.o: %.c
+$(OBJDIR):
+	@mkdir -p $@
+
+$(LIBDIR):
+	@mkdir -p $@
+
+$(OBJDIR)/%.o: %.c | $(OBJDIR)
 	$(CC) $(CFLAGS) $< -r
 
-%.a: %.o
+%.a: $(OBJDIR)/%.o
 	lwar -c $@ $?
 
-%: %.o
+%: $(OBJDIR)/%.o
 	$(LINKER) $(LFLAGS) $^ -o$@
 
 %: %.a
 	$(LINKER) $(LFLAGS) $^ -o$@
 
-%.o: %.as
+$(OBJDIR)/%.o: %.as | $(OBJDIR)
 	$(ASM) $(AFLAGS) $< $(ASOUT)$@
 
 # File managers
