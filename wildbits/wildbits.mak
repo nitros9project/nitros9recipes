@@ -8,7 +8,7 @@ else
   PLATFORM = k2
 endif
 
-DSKIMAGE = l$(LEVEL)_wildbits$(PLATFORM).dsk
+DSKIMAGE = ../disk_images/l$(LEVEL)_wildbits$(PLATFORM).dsk
 
 AFLAGS += -I.
 ifeq ($(LEVEL),2)

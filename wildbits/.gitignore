@@ -1,0 +1,8 @@
+# Build artifacts
+*.o
+*.a
+*.dsk
+*.list
+*.map
+bootfile
+
