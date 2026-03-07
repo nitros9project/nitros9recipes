@@ -6,7 +6,7 @@ This document covers building Wildbits targets from this repository.
 
 You can clone an existing recipe folder with minimal makefile edits.
 
-Example from `wildbits/`:
+Example from [`wildbits/`](./). The template file is [`recipe-template.mak`](recipe-template.mak).
 
 ```sh
 cp -R l1 myrecipe
@@ -39,9 +39,9 @@ export NITROS9DIR=/Users/boisy/Projects/coco-shelf/nitros9
 
 ## Build Directories
 
-- `l1/` builds Wildbits Level 1 disk images
-- `l2/` builds Wildbits Level 2 disk images
-- `feu/` builds FEU artifacts (`bootfile`, `booter`, flash packages)
+- [`l1/`](l1/) builds Wildbits Level 1 disk images
+- [`l2/`](l2/) builds Wildbits Level 2 disk images
+- [`feu/`](feu/) builds FEU artifacts (`bootfile`, `booter`, flash packages)
 
 Each build directory keeps intermediate artifacts local:
 
@@ -62,7 +62,7 @@ make PLATFORM=jr
 make PLATFORM=k2
 ```
 
-## Level 1 Build (`wildbits/l1`)
+## Level 1 Build ([`wildbits/l1`](l1/))
 
 ```sh
 cd l1
@@ -78,7 +78,7 @@ Useful targets:
 - `make all` (same as `make`)
 - `make clean`
 
-## Level 2 Build (`wildbits/l2`)
+## Level 2 Build ([`wildbits/l2`](l2/))
 
 ```sh
 cd l2
@@ -94,7 +94,7 @@ Useful targets:
 - `make all` (same as `make`)
 - `make clean`
 
-## FEU Build (`wildbits/feu`)
+## FEU Build ([`wildbits/feu`](feu/))
 
 ```sh
 cd feu

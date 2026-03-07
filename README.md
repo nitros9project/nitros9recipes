@@ -4,9 +4,9 @@ This repository contains standalone build recipes for NitrOS-9 ports, separated 
 
 ## What This Repository Does
 
-- Defines reusable build rules in `rules.mak`
-- Defines shared library build rules in `libs.mak`
-- Hosts platform-specific recipe folders (for example, `wildbits/`)
+- Defines reusable build rules in [`rules.mak`](rules.mak)
+- Defines shared library build rules in [`libs.mak`](libs.mak)
+- Hosts platform-specific recipe folders (for example, [`wildbits/`](wildbits/))
 
 Platform-specific usage, targets, and workflows should be documented in each platform folder README.
 
@@ -36,7 +36,7 @@ Object and library intermediates are now isolated per build directory:
 - `$(OBJDIR)` defaults to `.obj`
 - `$(LIBDIR)` defaults to `.lib`
 
-So when you build from `wildbits/l1`, `wildbits/l2`, or `wildbits/feu`, that directory will contain:
+So when you build from [`wildbits/l1`](wildbits/l1/), [`wildbits/l2`](wildbits/l2/), or [`wildbits/feu`](wildbits/feu/), that directory will contain:
 
 - `.obj/` for intermediate objects (`*.o`)
 - `.lib/` for generated libraries (`*.a`)
@@ -44,10 +44,10 @@ So when you build from `wildbits/l1`, `wildbits/l2`, or `wildbits/feu`, that dir
 
 ## Repository Structure
 
-- `rules.mak`: shared compiler/linker/tool definitions and pattern rules
-- `libs.mak`: shared library targets consumed by port makefiles
+- [`rules.mak`](rules.mak): shared compiler/linker/tool definitions and pattern rules
+- [`libs.mak`](libs.mak): shared library targets consumed by port makefiles
 - `<platform>/`: platform-specific recipes and usage documentation
 
 ## Platform Documentation
 
-- Wildbits: see `wildbits/README.md`
+- Wildbits: see [`wildbits/README.md`](wildbits/README.md)
