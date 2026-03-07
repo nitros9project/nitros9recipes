@@ -9,7 +9,7 @@ You can clone the base recipe folder with minimal makefile edits.
 Example from [`coco3/`](./). The template file is [`recipe-template.mak`](recipe-template.mak).
 
 ```sh
-cp -R l2 myrecipe
+cp -R 40d myrecipe
 cp recipe-template.mak myrecipe/recipe.mak
 cd myrecipe
 make
@@ -31,17 +31,17 @@ From the repository root, ensure:
 
 ## Build Directories
 
-- [`l2/`](l2/) builds CoCo 3 Level 2 40-track double-sided disk images
+- [`40d/`](40d/) builds CoCo 3 Level 2 40-track double-sided disk images
 
 Each build directory keeps intermediate artifacts local:
 
 - `.obj/` object files
 - `.lib/` static libraries
 
-## Level 2 Build ([`coco3/l2`](l2/))
+## Level 2 Build ([`coco3/40d`](40d/))
 
 ```sh
-cd l2
+cd 40d
 make
 ```
 
