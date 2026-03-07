@@ -38,9 +38,8 @@ BOOTMODS = krnp2 ioman init \
 	$(SCF) \
 	$(RBF) \
 	$(CLOCK) \
-	sysgo \
-	krn \
-	$(BOOTMODS_EXTRA)
+	$(BOOTMODS_EXTRA) \
+	krn
 else
 BOOTMODS = krn krnp2 ioman init \
 	$(SCF) \
@@ -68,13 +67,18 @@ bootfile: $(BOOTMODS)
 
 $(DSKIMAGE): bootfile $(CMDS)
 	$(RM) $@
-	$(OS9FORMAT_DW) -q $@ -n"NitrOS-9/$(CPU) Level $(LEVEL)"
+	$(OS9FORMAT_SD) -q $@ -n"NitrOS-9/$(CPU) Level $(LEVEL)"
 	$(OS9COPY) bootfile $@,OS9Boot
+ifeq ($(LEVEL),2)
+	$(OS9COPY) sysgo $@,sysgo
+	$(OS9ATTR_EXEC) $@,sysgo
+endif
 	$(MAKDIR) $@,CMDS
 	$(MAKDIR) $@,SYS
 	$(MAKDIR) $@,DEFS
 	$(OS9COPY) $(CMDS) $@,CMDS
 	$(OS9ATTR_EXEC) $(foreach file,$(CMDS),$@,CMDS/$(file))
+	$(OS9RENAME) $@,CMDS/shellplus shell
 #	$(CD) sys; $(CPL) $(SYSTEXT) ../$@,SYS
 #	$(OS9ATTR_TEXT) $(foreach file,$(SYSTEXT),$@,SYS/$(file))
 #	$(CD) sys; $(OS9COPY) $(SYSBIN) ../$@,SYS

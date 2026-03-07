@@ -32,6 +32,7 @@ From the repository root, ensure:
 ## Build Directories
 
 - [`40d/`](40d/) builds CoCo 1/2 Level 1 40-track double-sided disk images
+- [`dw/`](dw/) builds a CoCo 1/2 DriveWire-oriented Level 1 disk image
 
 Each build directory keeps intermediate artifacts local:
 
@@ -48,6 +49,25 @@ make
 Primary output:
 
 - `l1_coco.dsk` (default)
+
+## DriveWire Build ([`coco/dw`](dw/))
+
+```sh
+cd dw
+make
+```
+
+Primary output:
+
+- `l1_coco_dw.dsk` (default)
+
+This recipe defaults to:
+
+- DriveWire kernel booter (`boot_dw`)
+- DriveWire RBF modules/descriptors (`rbdw`, `dwio`, `ddx0`, `x1`, `x2`, `x3`)
+- `clock2_dw`
+- DriveWire-friendly disk format settings (`$(OS9FORMAT_DW)`)
+- network/userland commands: `dw`, `inetd`, `telnet`, `httpd`
 
 ## Notes
 

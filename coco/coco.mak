@@ -6,6 +6,8 @@ RECIPE ?= coco
 -include recipe.mak
 
 DSKIMAGE ?= l$(LEVEL)_$(RECIPE).dsk
+OS9FORMAT_CMD ?= $(OS9FORMAT_DS40)
+STARTUP ?= $(NITROS9DIR)/level1/$(PORT)/startup
 
 AFLAGS += -I.
 AFLAGS += -I$(L1MD)/kernel -I$(L1PMD)
@@ -18,14 +20,14 @@ SSDD35 = -DCyls=35 -DSides=1 -DSectTrk=18 -DSectTrk0=18 -DInterlv=3 -DSAS=8 -DDe
 DSDD40 = -DCyls=40 -DSides=2 -DSectTrk=18 -DSectTrk0=18 -DInterlv=3 -DSAS=8 -DDensity=1
 DSDD80 = -DCyls=80 -DSides=2 -DSectTrk=18 -DSectTrk0=18 -DInterlv=3 -DSAS=8 -DDensity=1 -DD35
 
-RBF = rbf rb1773 ddd0_40d d0_40d d1_40d d2_40d
-SCF = scf vtio covdg term_vdg
-PIPE = pipeman piper pipe
-CLOCK = clock_60hz clock2_soft
-KERNEL_TRACK = rel krn krnp2 init boot_1773
+RBF ?= rbf rb1773 ddd0_40d d0_40d d1_40d d2_40d
+SCF ?= scf vtio covdg term_vdg
+PIPE ?= pipeman piper pipe
+CLOCK ?= clock_60hz clock2_soft
+KERNEL_TRACK ?= rel krn krnp2 init boot_1773
 KERNELFILE = kerneltrack
 
-BOOTMODS = ioman \
+BOOTMODS ?= ioman \
 	$(RBF) \
 	$(SCF) \
 	$(PIPE) \
@@ -33,7 +35,8 @@ BOOTMODS = ioman \
 	sysgo_dd shell_21 \
 	$(BOOTMODS_EXTRA)
 
-CMDS += $(STDCMDS) \
+CMDS_BASE ?= $(STDCMDS)
+CMDS += $(CMDS_BASE) \
 	$(CMDS_EXTRA)
 
 all: libs $(DSKIMAGE)
@@ -47,15 +50,17 @@ kernelfile: $(KERNEL_TRACK)
 bootfile: $(BOOTMODS)
 	$(MERGE) $(BOOTMODS)>$@
 
-$(DSKIMAGE): kernelfile bootfile $(CMDS)
+$(DSKIMAGE): kernelfile bootfile $(CMDS) $(STARTUP)
 	$(RM) $@
-	$(OS9FORMAT_DS40) -q $@ -n"NitrOS-9/$(CPU) Level $(LEVEL)"
+	$(OS9FORMAT_CMD) -q $@ -n"NitrOS-9/$(CPU) Level $(LEVEL)"
 	$(OS9GEN) $@ -b=bootfile -t=$(KERNELFILE)
 	$(MAKDIR) $@,CMDS
 	$(MAKDIR) $@,SYS
 	$(MAKDIR) $@,DEFS
 	$(OS9COPY) $(CMDS) $@,CMDS
 	$(OS9ATTR_EXEC) $(foreach file,$(CMDS),$@,CMDS/$(file))
+	$(CPL) $(STARTUP) $@,startup
+	$(OS9ATTR_TEXT) $@,startup
 
 # Command rules
 pwd: pd.asm
@@ -121,6 +126,22 @@ d1_80d: rb1773desc.asm
 
 d2_80d: rb1773desc.asm
 	$(AS) $< $(ASOUT)$@ $(AFLAGS) $(DSDD80) -DDNum=2
+
+# DriveWire RBF descriptors
+ddx0: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDD=1 -DDNum=0
+
+x0: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDNum=0
+
+x1: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDNum=1
+
+x2: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDNum=2
+
+x3: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDNum=3
 
 clean:
 	$(RM) $(KERNEL_TRACK) $(BOOTMODS) $(CMDS) *.list *.map bootfile $(KERNELFILE) *.dsk
