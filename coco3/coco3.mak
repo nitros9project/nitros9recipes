@@ -7,6 +7,7 @@ RECIPE ?= coco3
 vpath %.asm $(LEVEL1)/coco1/modules
 
 DSKIMAGE ?= l$(LEVEL)_$(RECIPE).dsk
+OS9FORMAT_CMD ?= $(OS9FORMAT_DS40)
 
 AFLAGS += -I.
 AFLAGS += -I$(L2MD)/kernel -I$(L2PMD)
@@ -17,17 +18,17 @@ LFLAGS += $(LFLAGS_EXTRA)
 
 DSDD40 = -DCyls=40 -DSides=2 -DSectTrk=18 -DSectTrk0=18 -DInterlv=3 -DSAS=8 -DDensity=1
 
-RBF = rbf.mn rb1773.dr ddd0_40d.dd d0_40d.dd d1_40d.dd d2_40d.dd
-SCF = scf.mn vtio.dr snddrv_cc3.sb joydrv_joy.sb cowin.io \
+RBF ?= rbf.mn rb1773.dr ddd0_40d.dd d0_40d.dd d1_40d.dd d2_40d.dd
+SCF ?= scf.mn vtio.dr snddrv_cc3.sb joydrv_joy.sb cowin.io \
 	term_win80.dt w.dw w1.dw w2.dw w3.dw w4.dw w5.dw w6.dw w7.dw \
 	w8.dw w9.dw w10.dw w11.dw w12.dw w13.dw w14.dw w15.dw
-PIPE = pipeman.mn piper.dr pipe.dd
-CLOCK = clock_60hz clock2_soft
-KERNEL_TRACK = rel_80 boot_1773_6ms krn
+PIPE ?= pipeman.mn piper.dr pipe.dd
+CLOCK ?= clock_60hz clock2_soft
+KERNEL_TRACK ?= rel_80 boot_1773_6ms krn
 KERNELFILE = kerneltrack
 STARTUP ?= $(NITROS9DIR)/level2/$(PORT)/startup
 
-BOOTMODS = krnp2 ioman init \
+BOOTMODS ?= krnp2 ioman init \
 	$(RBF) \
 	$(SCF) \
 	$(PIPE) \
@@ -38,7 +39,8 @@ BOOTMODS = krnp2 ioman init \
 SHELLMODS = shellplus date deiniz echo iniz link load save unlink
 UTILPAK1 = attr build copy del deldir dir display list makdir mdir merge mfree procs rename tmode
 
-CMDS += $(STDCMDS) grfdrv shell utilpak1 \
+CMDS_BASE ?= $(STDCMDS) grfdrv shell utilpak1
+CMDS += $(CMDS_BASE) \
 	$(CMDS_EXTRA)
 
 all: libs $(DSKIMAGE)
@@ -54,7 +56,7 @@ bootfile: $(BOOTMODS)
 
 $(DSKIMAGE): kernelfile bootfile $(CMDS) $(STARTUP)
 	$(RM) $@
-	$(OS9FORMAT_DS40) -q $@ -n"NitrOS-9/$(CPU) Level $(LEVEL)"
+	$(OS9FORMAT_CMD) -q $@ -n"NitrOS-9/$(CPU) Level $(LEVEL)"
 	$(OS9GEN) $@ -b=bootfile -t=$(KERNELFILE)
 	$(MAKDIR) $@,CMDS
 	$(MAKDIR) $@,SYS
@@ -109,6 +111,44 @@ d1_40d.dd: rb1773desc.asm
 
 d2_40d.dd: rb1773desc.asm
 	$(AS) $< $(ASOUT)$@ $(AFLAGS) $(DSDD40) -DDNum=2
+
+# DriveWire RBF descriptors
+ddx0.dd: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDD=1 -DDNum=0
+
+x0.dd: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDNum=0
+
+x1.dd: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDNum=1
+
+x2.dd: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDNum=2
+
+x3.dd: dwdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DDNum=3
+
+# DriveWire SCF descriptors
+term_scdwv.dt: scdwvdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DAddr=0
+
+n_scdwv.dd: scdwvdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DAddr=255
+
+n1_scdwv.dd: scdwvdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DAddr=1
+
+n2_scdwv.dd: scdwvdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DAddr=2
+
+n3_scdwv.dd: scdwvdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DAddr=3
+
+n4_scdwv.dd: scdwvdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DAddr=4
+
+n5_scdwv.dd: scdwvdesc.asm
+	$(AS) $< $(ASOUT)$@ $(AFLAGS) -DAddr=5
 
 clean:
 	$(RM) $(KERNEL_TRACK) $(BOOTMODS) $(CMDS) *.list *.map bootfile $(KERNELFILE) *.dsk
