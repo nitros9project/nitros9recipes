@@ -2,6 +2,28 @@
 
 This document covers building Wildbits targets from this repository.
 
+## Creating Your Own Recipe (Copy Workflow)
+
+You can clone an existing recipe folder with minimal makefile edits.
+
+Example from `wildbits/`:
+
+```sh
+cp -R l1 myrecipe
+cp recipe-template.mak myrecipe/recipe.mak
+cd myrecipe
+make
+```
+
+Only edit `myrecipe/recipe.mak` for common customization:
+
+- `RECIPE` to change output name
+- `CMDS_EXTRA` to add disk commands
+- `BOOTMODS_EXTRA` to add boot modules
+- `AFLAGS_EXTRA` / `LFLAGS_EXTRA` for extra flags
+
+This avoids modifying large shared makefiles.
+
 ## Prerequisites
 
 From the repository root, ensure:

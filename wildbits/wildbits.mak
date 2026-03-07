@@ -1,5 +1,7 @@
-PORT = wildbits
+PORT ?= wildbits
+RECIPE ?= wildbits
 include ../../rules.mak
+-include recipe.mak
 
 ifeq ($(PLATFORM), jr)
   KEYSUB = keydrv_ps2
@@ -8,14 +10,16 @@ else
   PLATFORM = k2
 endif
 
-DSKIMAGE = l$(LEVEL)_wildbits$(PLATFORM).dsk
+DSKIMAGE ?= l$(LEVEL)_$(RECIPE)$(PLATFORM).dsk
 
 AFLAGS += -I.
 ifeq ($(LEVEL),2)
 AFLAGS += -I$(L2MD)/kernel -I$(L2PMD)
 endif
 AFLAGS += -I$(L1MD)/kernel -I$(L1PMD)
+AFLAGS += $(AFLAGS_EXTRA)
 LFLAGS += -L $(LIBDIR) -lwildbitsl$(LEVEL) -lnet -lalib
+LFLAGS += $(LFLAGS_EXTRA)
 
 RBF = rbf rbsuper llwbsd rbmem dds0 s1 f0 f1
 SCF = scf vtio $(KEYSUB) term bannerfont palette
@@ -35,25 +39,28 @@ BOOTMODS = krnp2 ioman init \
 	$(RBF) \
 	$(CLOCK) \
 	sysgo \
-	krn
+	krn \
+	$(BOOTMODS_EXTRA)
 else
 BOOTMODS = krn krnp2 ioman init \
 	$(SCF) \
 	$(RBF) \
 	$(CLOCK) \
-	sysgo shell_21
+	sysgo shell_21 \
+	$(BOOTMODS_EXTRA)
 endif
 
 CMDS += $(STDCMDS) \
 	bootos9 wbinfo wbreset modem \
-	inetd telnet dw httpd $(BASIC09) $(BF)
+	inetd telnet dw httpd $(BASIC09) $(BF) \
+	$(CMDS_EXTRA)
 
 all: libs $(DSKIMAGE)
 
 include ../../libs.mak
 
 ifeq ($(LEVEL),2)
-	PADUP = ./padup256 bootfile
+	PADUP ?= ./padup256 bootfile
 endif
 bootfile: $(BOOTMODS)
 	$(MERGE) $(BOOTMODS)>$@
