@@ -1,6 +1,6 @@
 vpath %.as $(NITROS9DIR)/lib:$(NITROS9DIR)/lib/alib
 
-LIB_NAMES = libnos96809l1.a libnos96809l2.a libnos96309l2.a libnet.a libalib.a \
+LIB_NAMES ?= libnos96809l1.a libnos96809l2.a libnos96309l2.a libnet.a libalib.a \
 	libcoco.a libcoco3.a libcoco3_6309.a libdragon.a libatari.a \
 	libmc09.a libwildbitsl1.a libwildbitsl2.a
 LIB_TARGETS = $(addprefix $(LIBDIR)/,$(LIB_NAMES))
