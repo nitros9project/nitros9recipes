@@ -6,7 +6,7 @@ This repository contains standalone build recipes for NitrOS-9 ports, separated 
 
 - Defines reusable build rules in [`rules.mak`](rules.mak)
 - Defines shared library build rules in [`libs.mak`](libs.mak)
-- Hosts platform-specific recipe folders (for example, [`wildbits/`](wildbits/) and [`coco1/`](coco1/))
+- Hosts platform-specific recipe folders (for example, [`wildbits/`](wildbits/) and [`coco/`](coco/))
 
 Platform-specific usage, targets, and workflows should be documented in each platform folder README.
 
@@ -51,4 +51,4 @@ So when you build from [`wildbits/l1`](wildbits/l1/), [`wildbits/l2`](wildbits/l
 ## Platform Documentation
 
 - Wildbits: see [`wildbits/README.md`](wildbits/README.md)
-- CoCo 1: see [`coco1/README.md`](coco1/README.md)
+- CoCo 1/2: see [`coco/README.md`](coco/README.md)

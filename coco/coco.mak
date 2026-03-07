@@ -1,4 +1,8 @@
-RECIPE ?= coco1
+PORT ?= coco1
+CPU ?= 6809
+MACHINE ?= TRS-80 Color Computer 1/2
+include ../../rules.mak
+RECIPE ?= coco
 -include recipe.mak
 
 DSKIMAGE ?= l$(LEVEL)_$(RECIPE).dsk
@@ -35,7 +39,7 @@ CMDS += $(STDCMDS) \
 all: libs $(DSKIMAGE)
 
 LIB_NAMES = libnos96809l1.a libnet.a libalib.a libcoco.a
-include ../libs.mak
+include ../../libs.mak
 
 kernelfile: $(KERNEL_TRACK)
 	$(MERGE) $(KERNEL_TRACK)>$(KERNELFILE)
