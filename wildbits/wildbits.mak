@@ -3,7 +3,7 @@ RECIPE ?= wildbits
 include ../../rules.mak
 -include recipe.mak
 
-ifeq ($(PLATFORM), jr)
+ifeq ($(PLATFORM), jr2)
   KEYSUB = keydrv_ps2
 else
   KEYSUB = keydrv_k2

@@ -4,7 +4,7 @@ vpath %.asm $(NITROS9DIR)/level1/$(PORT)/feu
 vpath %.as $(NITROS9DIR)/level1/$(PORT)/feu
 include ../../rules.mak
 
-ifeq ($(PLATFORM), jr)
+ifeq ($(PLATFORM), jr2)
   KEYSUB = keydrv_ps2
 else
   KEYSUB = keydrv_k2
@@ -73,9 +73,6 @@ booter: bootfile
 	$(AS) -DFLASH=1 --output=raw $(LEVEL1)/$(PORT)/feu/trampoline.asm -o$@.tmp
 	cat bootfile $@.tmp > $@
 	$(RM) $@.tmp
-
-upload: booter
-	upload $^ 8000
 
 flash: flash_booter flash_f0
 	
@@ -326,5 +323,14 @@ z14: scdwvdesc.asm
 clean:
 	$(RM) $(BOOTMODS) $(F0_CMDS) *.list *.map bootfile *.dsk booter* *.zip *.csv f0_? sysgo startup
 	-rm -rf $(OBJDIR) $(LIBDIR)
+
+help:
+	@echo "Make scenarios:"
+	@echo "  make flash_booter PLATFORM=jr2: flash booter for Jr2"
+	@echo "  make flash_booter PLATFORM=k2: flash booter for K2"
+	@echo "  make flash PLATFORM=jr2: flash booter for Jr2"
+	@echo "  make flash PLATFORM=k2: flash booter for K2"
+	@echo "  make flash_f0 PLATFORM=jr2: flash /f0 for Jr2"
+	@echo "  make flash_f0 PLATFORM=k2: flash /f0 for K2"
 
 .PHONY: all clean upload flash flash_booter flash_f0 libs

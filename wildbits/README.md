@@ -53,12 +53,12 @@ Each build directory keeps intermediate artifacts local:
 Supported `PLATFORM` values:
 
 - `k2` (default)
-- `jr`
+- `jr2`
 
 Use as:
 
 ```sh
-make PLATFORM=jr
+make PLATFORM=jr2
 make PLATFORM=k2
 ```
 
@@ -71,7 +71,7 @@ make
 
 Primary output:
 
-- `l1_wildbitsk2.dsk` (or `l1_wildbitsjr.dsk` when `PLATFORM=jr`)
+- `l1_wildbitsk2.dsk` (or `l1_wildbitsjr2.dsk` when `PLATFORM=jr2`)
 
 Useful targets:
 
@@ -87,7 +87,7 @@ make
 
 Primary output:
 
-- `l2_wildbitsk2.dsk` (or `l2_wildbitsjr.dsk` when `PLATFORM=jr`)
+- `l2_wildbitsk2.dsk` (or `l2_wildbitsjr2.dsk` when `PLATFORM=jr2`)
 
 Useful targets:
 
@@ -118,7 +118,7 @@ Additional FEU targets:
 
 FEU disk image name pattern:
 
-- `feu_wildbitsk2.dsk` or `feu_wildbitsjr.dsk` (when that target is built)
+- `feu_wildbitsk2.dsk` or `feu_wildbitsjr2.dsk` (when that target is built)
 
 ## Notes
 
